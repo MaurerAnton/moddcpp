@@ -1,31 +1,45 @@
-# moddcpp — File Watcher and Process Runner (C++ port of modd)
+# moddcpp — File Watcher and Command Runner (C++ port of modd)
 
-A zero-dependency C++ port of [modd](https://github.com/cortesi/modd) — watch files and directories, then run commands when they change.
+A zero-dependency C++ port of [modd](https://github.com/cortesi/modd) — watch files and directories for changes, then run commands.
 
 ## Why moddcpp?
 
-The original [modd](https://github.com/cortesi/modd) requires the Go toolchain plus dozens of modules. moddcpp compiles with a single `make` using only C++17 and standard Linux headers.
+The original [modd](https://github.com/cortesi/modd) requires Go plus dozens of modules. moddcpp compiles with a single `make` using only C++17 and pthreads.
 
 ## Quick Start
 
 ```bash
 make
-./moddcpp
+./moddcpp moddcpp.conf
 ```
 
 ## Features
 
-- Recursive file watching via inotify
-- Pattern-based file matching and exclusion
-- Run commands on change (build, test, deploy)
-- Pre/post hooks
-- Configurable debounce and cooldown periods
-- TOML configuration format
-- Signal forwarding to child processes
+- inotify-based file watching (Linux only)
+- Recursive directory watching with glob/exclude patterns
+- Configurable debounce delay per rule
+- Shell command execution on file change
+- Running child process termination before re-execution
+- Graceful shutdown with SIGINT forwarding
+
+## Config Format (moddcpp.conf)
+
+```
+prep {
+    command: make
+}
+watch {
+    pattern: "src/*.cpp"
+    exclude: "*_test.cpp"
+    prep: g++ -c $FILE
+    run: ./myapp
+    delay_ms: 300
+}
+```
 
 ## Build
 
 ```bash
 make
 ```
-Requires: GCC 10+ or Clang 12+, GNU Make
+Requires: GCC 10+ or Clang 12+, GNU Make, Linux (inotify)
